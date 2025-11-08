@@ -9,7 +9,7 @@
 
 This project was developed for a hackathon focused on integrating AI and automation to improve workflows in an insurance company.
 
-Our goal was to create a voice-to-voice assistant that helps employees work faster and with less stress. The assistant communicates in audio, recognizes and translates multiple languages, and automates common insurance tasks such as contacting clients, reviewing active claims, and registering new ones.
+Our goal was to create a voice-to-voice assistant that helps employees work faster and with less stress. The assistant communicates in audio, recognizes and translates multiple languages, and automates common insurance tasks such as contacting clients, reviewing claims, and registering new ones.
 
 ---
 
@@ -21,9 +21,10 @@ Our goal was to create a voice-to-voice assistant that helps employees work fast
 - **Auto Language Recognition**  
   Detects spoken language automatically and translates to the employee’s preferred language.
 
-- **Task Automation**
+- **Task Automation**  
   - Contact customers whose policies are about to expire (within 30 days).  
-  - Retrieve customers with claims currently under review and provide them in a CSV file.  
+  - Contact customers who still have unpaid fees.  
+  - Retrieve claims currently under review and provide them as a CSV file.  
   - Create a new claim, automatically generating a formatted PDF report.
 
 ---
@@ -35,53 +36,54 @@ The workflow starts when a Telegram message is received by our bot.
 
 1. **Trigger:** Telegram message → determines conversation state (`new` or `creating_claim`)  
 2. **Processing:**  
-   - If `new`: an AI bot analyzes intent → possible paths:
-     - Fail to understand question  
-     - Contact customers with expiring policies  
-     - Provide a CSV list of claims under review  
-     - Enter “create new claim” mode  
-   - If `creating_claim`: the claim creation assistant handles the input.
+   - If `new`: an AI bot analyzes intent and directs the flow according to the following ordered paths:
+     1. Fail to understand question  
+     2. Contact customers with expiring policies  
+     3. Retrieve claims under review (CSV)  
+     4. Contact customers with unpaid fees  
+     5. Enter “create new claim” mode  
+   - If `creating_claim`: the claim creation assistant handles the input and follows the leave/invalid/valid claim steps as appropriate.
 
 ---
 
-## Conversation Paths
+## Conversation Paths (ordered workflow)
 
 ### 1. Fail to Understand Question
-Sends an audio message (in the employee’s language) describing available options.
+When the assistant cannot parse the employee's intent, it sends an audio message (in the employee’s language) describing the available options and how to trigger them.
 
 ### 2. Contact Customers (Expiring Policies)
 - Fetches customer and policy data from **Airtable**.  
 - Filters customers whose policy expires in the next 30 days.  
 - Sends the relevant data to a voice AI agent (ElevenLabs + Twilio).  
 - The AI calls customers and notifies them about their expiring policy.  
-> Currently supports English only, but multi-language support is planned.
+> Currently supports English only; multi-language support is planned.
 
 ### 3. Retrieve Claims Under Review (CSV)
 - Queries **Airtable** for claims with a status marked as "Under Review".  
 - Exports these records into a **CSV file**.  
-- Sends the file back to the employee via chat, allowing quick access to all pending claims.
+- Sends the file back to the employee via chat for quick access to pending claims.
 
-### 4. Enter “Create New Claim” Mode
-Prompts the employee for the information required to register a claim.
+### 4. Contact Customers (Unpaid Fees)
+- Fetches customer and payment data from **Airtable**.  
+- Filters customers with outstanding or overdue fees.  
+- Passes the filtered data to a voice AI agent (ElevenLabs + Twilio).  
+- The AI calls customers to remind them of pending payments and provides guidance on how to proceed.  
+> Future improvement: enable multilingual and personalized call messages.
 
-### 5. Leave Claim Creation
-Allows the employee to cancel the process and return to the main state.
+### 5. Enter “Create New Claim” Mode
+Prompts the employee (via audio) for the information required to register a claim and changes the conversation state to `creating_claim`.
 
-### 6. Invalid Claim
-Informs the employee (via audio) that the provided data was insufficient.
-
-### 7. Valid Claim
-- Fetches the related policy ID from Airtable.  
-- Creates a new record in the **Claims** table.  
-- Sends an audio confirmation.  
-- Generates an HTML report, converts it to PDF, and sends it back in chat.
+#### Sub-Paths (handled within claim creation)
+- **Leave Creating Claim** → Cancels the claim creation process and returns to the `new` state.  
+- **Invalid Claim** → Requests missing or corrected data if information is insufficient.  
+- **Valid Claim** → Fetches related policy ID, creates a record in **Airtable**, sends an audio confirmation, and generates a PDF report.
 
 ---
 
 ## Current Limitations
 
-- The **Telegram trigger must be manually re-enabled** after each run (not persistent).  
-- **Airtable cannot check for missing records**, limiting validation (e.g., unknown customers or chat IDs).  
+- The **Telegram trigger must be manually re-enabled** after each run (not persistent), which prevents a seamless always-listening flow.  
+- **Airtable cannot check for missing records** in the current setup, limiting reliable validation (e.g., unknown customers or chat IDs).  
 - The **frontend is not yet connected** to the backend.
 
 ---
@@ -115,7 +117,7 @@ Customer side (future):
 | Database | Airtable |
 | Frontend | Stitch (VS Code) |
 | PDF Generation | HTML → PDF conversion |
-| File Output | CSV Export via n8n |
+| File Output | CSV export via n8n |
 | AI Processing | Custom intent recognition bot |
 
 ---
@@ -125,25 +127,16 @@ Customer side (future):
 1. Open the **n8n** workflow.  
 2. Manually enable the **Telegram trigger** associated with the bot.  
 3. Send a voice message to the bot to start a conversation.  
-4. Follow audio instructions to perform one of the supported actions.
+4. Follow audio instructions to perform one of the supported actions (call about expiring policies, fetch claims CSV, call about fees, create new claim, etc.).
 
 ---
 
 ## Future Improvements
 
-- Persistent Telegram webhook listener  
-- Airtable record validation  
-- Multi-language support for the voice agent  
-- Full frontend-backend integration  
-- Customer-facing chat and claim management portal  
-- Smarter voice intent classification  
-- Dynamic CSV and PDF export customization
-
----
-
-## Team
-
-- André Sousa
-- Mário Simões
-- Sunday Onwe
-- Tomás Ferreira
+- Persistent Telegram webhook listener to maintain continuous conversation flow.  
+- Airtable record validation and robust error handling for missing or duplicated records.  
+- Multi-language support for the voice agent and call personalization.  
+- Personalized message templates for fee reminders and claim notifications.  
+- Full frontend-backend integration and employee authentication.  
+- Customer-facing chat and claim management portal.  
+- Smarter voice intent classification and configurable CSV/PDF export options.
