@@ -1,0 +1,3102 @@
+{
+  "name": "InsurTech Voice Claim Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "=appWqdrq3BwvwyyPN",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblSqQBJsQI87ax8G",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        2080
+      ],
+      "id": "0a7cec83-1804-4fd7-9948-bd28e9408b06",
+      "name": "Get Policies",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appHrGAmKTCuryte4",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUB0JERd31kpYJh",
+          "mode": "id"
+        },
+        "filterByFormula": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        2272
+      ],
+      "id": "1629cef9-83e9-4457-97fe-4f74ad6e838b",
+      "name": "Get Customers",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d06ac6f2-aad9-4ada-959a-5cc2d9757993",
+              "leftValue": "={{ (new Date() - new Date($json['End Date']) ) / (1000 * 60 * 60 * 24) }}",
+              "rightValue": 30,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            },
+            {
+              "id": "95707d53-d363-40b8-8cf6-76e12f81cc34",
+              "leftValue": "={{ $json['Notified?'] }}",
+              "rightValue": "False",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c0e58b1a-0a62-4940-b4e2-3631551a7f97",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "=Active",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        2080
+      ],
+      "id": "5c75a998-3ea9-424e-a6b1-e39a1a997552",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "- Todays Date - End date <= 30 days\n- Notified? == False\n- Status == Active\n",
+        "height": 80,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        2048
+      ],
+      "id": "ab06e8dc-246e-4500-ad85-c159de8a6dbd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Customer Name",
+              "field2": "Full Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1904,
+        2176
+      ],
+      "id": "800af237-57d2-493b-aa20-aba2adcf560a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "Retrieves Customer/Policy information of Customers who haven't been contacted yet, but their policies are almost ending.",
+        "height": 96
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        2080
+      ],
+      "id": "53b6d3e8-3085-4b92-a2de-8e802cf267e7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -368,
+        3280
+      ],
+      "id": "a062107d-a072-45a2-a6dd-efcb44a67ffe",
+      "name": "Telegram Trigger",
+      "webhookId": "cb6fedbc-4cb8-4372-8fdb-610d1492af00",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "operation": "speechToText",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        80,
+        3280
+      ],
+      "id": "6decfca5-71f5-47a1-b382-18522c3d2447",
+      "name": "Transcribe audio or video",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Transcribe audio or video').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant\n\nRecognize Language and fill the field \"language\" with its abreviation.\n\nDon't worry about giving the specific information that it is asked. Just focus on providing a json file.\n\nThe state should be returned as a string.\n\nReturn a state of 1 if the topic is related to contacting customers who have their policy almost coming to an end, expiring or something similar.\n\nReturn a state of 2 if the topic is related to claims under review, or similar.\n\nReturn a state of 3 if the topic is related to creating a new claim, or similar.\n\nReturn a state of 4 if the topic is related to customers who didn't pay the monthly fee.\n\nIf none of the topics apply, return a state of 0"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        752,
+        2464
+      ],
+      "id": "876623e3-6e10-4b72-9f75-a88dd637a6f5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"state\": \"1\",\n  \"language\": \"EN\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        2688
+      ],
+      "id": "33caa178-1958-46f2-8e04-e202d3da90a1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        768,
+        2688
+      ],
+      "id": "904496b6-4950-494c-941d-c6143f6fc596",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app1tIaZ0sJrEv6Di",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl1KgiEu3D5fTvAw",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2080,
+        2480
+      ],
+      "id": "d6d04edb-4b3b-4ac0-8231-6390754277da",
+      "name": "Get Claims",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "- Status == Under Review",
+        "height": 80,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        2448
+      ],
+      "id": "e4864468-d361-4e55-b9ca-627ce4fb6b69",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Retrieves claims that are still under review.",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        2352
+      ],
+      "id": "3cfcedb4-b2f6-4797-a93a-9d237c332826",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0c7aa20d-a366-41c8-adae-4ebc2ae3af2c",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Under Review",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2368,
+        2480
+      ],
+      "id": "80ff076e-4f16-4db1-a552-4a9efa92573d",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "122634e4-11a2-4a06-8389-d1b53e029fbe"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "03015822-4dba-4196-aeef-94213358b3ae",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fe3b68d5-8ad4-4e93-9384-3a12499f3a4e",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b30a7ba7-b12f-4165-93f8-68400ca33f35",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "3",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9fd2b0c2-2b54-4b5b-be10-61a33eac71b2",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "4",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1104,
+        2432
+      ],
+      "id": "fe1d1488-eaca-42a3-afda-ff3b523caedd",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "Recieve Audio Input",
+        "height": 80,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        3152
+      ],
+      "id": "9f9b54de-859d-4891-ad14-f23b899468f8",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "ERROR: Reply with try again",
+        "height": 80,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        1792
+      ],
+      "id": "c4c76b77-e519-456e-b69e-ca9d7a0bd02c",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "ASK: employee about the new claim",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        2688
+      ],
+      "id": "ef800f16-2201-4be7-a232-d385ef624649",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "app1tIaZ0sJrEv6Di"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl1KgiEu3D5fTvAw",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Estimated Damage": "={{ $json.estimatedDamage }}",
+            "Policy ID": "={{ $json.policyID }}",
+            "Customer Name": "={{ $json.customerName }}",
+            "Incident Date": "={{ $json.incidentDate }}",
+            "Incident Type": "={{ $json.incidentType }}",
+            "Description": "={{ $json.description }}",
+            "Location": "={{ $json.location }}",
+            "Status": "Submitted",
+            "Date Reported": "={{ $json.dateReported }}",
+            "Agent Notes": "={{ $json.agentNotes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Policy ID",
+              "displayName": "Policy ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date Reported",
+              "displayName": "Date Reported",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Incident Date",
+              "displayName": "Incident Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Incident Type",
+              "displayName": "Incident Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                },
+                {
+                  "name": "Under Review",
+                  "value": "Under Review"
+                },
+                {
+                  "name": "Paid",
+                  "value": "Paid"
+                },
+                {
+                  "name": "Submitted",
+                  "value": "Submitted"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estimated Damage",
+              "displayName": "Estimated Damage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Approved Amount",
+              "displayName": "Approved Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Agent Notes",
+              "displayName": "Agent Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a597d3b1-68b6-4372-94b4-4ffb2044ae98",
+      "name": "Create Claim in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        4224
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "{\n    \"customerName\": \"\",\n    \"dateReported\": \"\",\n    \"incidentDate\": \"\",\n    \"incidentType\": \"\",\n    \"description\": \"\",\n    \"location\": \"\",\n    \"estimatedDamage\": 0.0\n}",
+        "height": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        4384
+      ],
+      "id": "a6ede208-edab-4627-9100-d8dd27402384",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "{\n  \"status\": 1,\n  \"language\": \"EN\"\n}",
+        "height": 96,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        784,
+        2336
+      ],
+      "id": "31368cbf-fe1f-411c-9290-4436c218f0ad",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Full Name",
+              "field2": "Customer Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2624,
+        2400
+      ],
+      "id": "8d76027d-5a95-4701-859a-bf7552df0c74",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        3280
+      ],
+      "id": "2b718f65-905b-4973-b195-9ae18a923ec1",
+      "name": "Get Voice File",
+      "webhookId": "14b3a339-21b5-4a2a-b9bf-fe470db91e17",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Transcribe audio or video').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant\n\nDon't ask questions, focus on just giving the output as expected.\n\nYou are looking to fill a json with this information about a claim:\n{\n    \"customerName\": \"\",\n    \"dateReported\": \"\",\n    \"incidentDate\": \"\",\n    \"incidentType\": \"\",\n    \"description\": \"\",\n    \"location\": \"\",\n    \"estimatedDamage\": 0.0,\n    \"agentNotes\": \"\"\n}\n\nFill \"language\" with the language abreviation the customer is speaking.\n\nHere are some of the already existing incident types: Auto Accident, Water Damage, Auto Accident, Theft, Medical, Fire, Other, Theft\n\nSome of the descriptions: Rear-ended at red light. Bumper and trunk damage; Pipe burst in basement during cold snap. Significant water damage to flooring; Hit deer on rural highway. Front end damage; Tools stolen from truck bed overnight; Emergency room visit for broken ankle; Kitchen fire from unattended stove. Damage to kitchen cabinets and appliances; Windshield cracked by rock on highway; Break-in through back door. TV and laptop stolen.\n\nSome of the locations: Main St & 5th Ave; Customer's home address; Highway 101 mile marker 43; Work site parking lot; St. Mary's Hospital; Customer's home address; Interstate 95; Customer's home address.\n\nDon't give any response different from what follows, keep consistency, you only have two values to fill: state and body.\n\nDon't force Agent Notes, but try to look for them, be extra careful to not confuse them with description. \n\nIf you don't have the first and last name is a bad claim, mark it as bad.\n\nIf you were able to extract all information (appart from agent notes), write state as \"Good\", else write it as \"Bad\"\n\nInstead, if the employee wants to do another task,or stop creating a claim, write it as \"Leave\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        752,
+        4000
+      ],
+      "id": "633f200d-61e5-4728-a7c6-ea060fe140d8",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"state\": \"Leave\",\n  \"body\": {\n    \"customerName\": \"Bob Smith\",\n    \"dateReported\": \"2021-11-11\",\n    \"incidentDate\": \"2021-10-10\",\n    \"incidentType\": \"Fire\",\n    \"description\": \"House burned down\",\n    \"location\": \"5th avenue\",\n    \"estimatedDamage\": 0.0,\n    \"agentNotes\": \"Fire department report recieved.\"\n  },\n  \"language\": \"EN\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        4224
+      ],
+      "id": "f437b7ca-0977-4cf2-ab24-719970e32b7a",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        752,
+        4224
+      ],
+      "id": "504dbee6-5ce5-483b-a7c4-a1bee7ce9350",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Check if it's an ongoing conversation\n0: new\n1: creating a claim",
+        "height": 96,
+        "width": 182
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        3008
+      ],
+      "id": "d349bc63-5213-4a33-8743-66112f9c26d6",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "Leave",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "122634e4-11a2-4a06-8389-d1b53e029fbe"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "03015822-4dba-4196-aeef-94213358b3ae",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "Bad",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fe3b68d5-8ad4-4e93-9384-3a12499f3a4e",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "Good",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1104,
+        3984
+      ],
+      "id": "b65c2362-5351-4baf-9576-c55c0abf9cb4",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "content": "0: Stop Claim Creation\n1: Invalid Claim\n2: Valid Claim",
+        "height": 80,
+        "width": 198
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        3840
+      ],
+      "id": "2543970b-6f58-4ad9-bc98-06e7e9ede94e",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app57pcunMKVVxldn",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblO8oGqqrYIcXfQV",
+          "mode": "id"
+        },
+        "filterByFormula": "={ChatID} =  {{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        3280
+      ],
+      "id": "3b2dab2d-0d0d-49d5-b311-b3129a6b185a",
+      "name": "Search records",
+      "alwaysOutputData": false,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app57pcunMKVVxldn",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblO8oGqqrYIcXfQV",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "State": "creating_claim",
+            "ChatID": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "ChatID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ChatID",
+              "displayName": "ChatID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2080,
+        2640
+      ],
+      "id": "e8ddf737-0b14-4f0d-8aa2-3ab266a5fe62",
+      "name": "Update Employee State4",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.State }}",
+                    "rightValue": "new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "01be2d96-59b2-4bd9-b8f1-712f72cc8c82"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c767d841-0f98-4612-b66f-6e3ec3f406a1",
+                    "leftValue": "={{ $json.State }}",
+                    "rightValue": "creating_claim",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        528,
+        3280
+      ],
+      "id": "6f2e2a73-94cc-4971-ab0b-3ea2d1f38d86",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app57pcunMKVVxldn",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblO8oGqqrYIcXfQV",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "State": "new",
+            "ChatID": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "ChatID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ChatID",
+              "displayName": "ChatID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        3344
+      ],
+      "id": "5b40af7c-4e9c-429f-8dde-7e5580b42c1e",
+      "name": "Update Employee State",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n    \"policyID\": \"{{ $json['Policy ID'] }}\",\n    \"customerName\": \"{{ $json.output.body.customerName }}\",\n    \"dateReported\": \"{{ $json.output.body.dateReported }}\",\n    \"incidentDate\": \"{{ $json.output.body.incidentDate }}\",\n    \"incidentType\": \"{{ $json.output.body.incidentType }}\",\n    \"description\": \"{{ $json.output.body.description }}\",\n    \"location\": \"{{ $json.output.body.location }}\",\n    \"estimatedDamage\": {{ $json.output.body.estimatedDamage }},\n    \"agentNotes\": \"{{ $json.output.body.agentNotes }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        4224
+      ],
+      "id": "b6ff6f2e-1909-49a9-bc4a-fc500c493e3a",
+      "name": "Invalid Claim Message1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "output.body.customerName",
+              "field2": "Customer Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1616,
+        4224
+      ],
+      "id": "f5eeb0f1-2932-480a-8274-bc50f40c82b1",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "=appWqdrq3BwvwyyPN",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblSqQBJsQI87ax8G",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        4304
+      ],
+      "id": "9e0a68c5-71cb-4dd1-b6a9-3c0c1db960ff",
+      "name": "Get Policies2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Try_Again }}{{ $json.output.language }}",
+        "options": {
+          "systemMessage": "Translate the message text to the language of the country code provided in the input. \n\nIf the language is already English, then send the original message as output"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        1680
+      ],
+      "id": "ca494ed5-cf7e-46f5-a920-7f1ae8a55eaf",
+      "name": "AI Agent2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        1904
+      ],
+      "id": "248ccf0d-82ed-422c-910b-eb860c08ef9e",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da4f9e51-7aa7-4473-a46a-2e41e65e6a74",
+              "name": "Try_Again",
+              "value": "I’m sorry, but I couldn’t interpret your request. Please specify whether you want to contact customers with policies nearing expiration, retrieve claims under review, or create a new claim.",
+              "type": "string"
+            },
+            {
+              "id": "b15d143b-0681-4eff-908c-bb51fbad4e6b",
+              "name": "output.language",
+              "value": "={{ $json.output.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        1792
+      ],
+      "id": "2206793c-3000-42b0-8438-4743c6767e2f",
+      "name": "Edit Fields",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "29vD33N1CtxCmqQRPOHJ",
+          "mode": "list",
+          "cachedResultName": "Drew"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        1792
+      ],
+      "id": "0edca77e-5f68-4407-bbd0-4f57729309b3",
+      "name": "Convert text to speech",
+      "executeOnce": true,
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        1792
+      ],
+      "id": "0e8b99cc-6674-439d-ad8b-a55496f1bd55",
+      "name": "Send an audio file5",
+      "webhookId": "2bf48aa7-c4f4-44e7-94cb-43788987103b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app57pcunMKVVxldn",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblO8oGqqrYIcXfQV",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "State": "new",
+            "ChatID": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "ChatID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "ChatID",
+              "displayName": "ChatID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        4496
+      ],
+      "id": "a9bd4fad-048e-43f5-b992-e9b4217f0d63",
+      "name": "Update Employee State1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Try_Again }}{{ $json.output.language }}",
+        "options": {
+          "systemMessage": "Translate the message text to the language of the country code provided in the input. \n\nIf the language is already English, then send the original message as output"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2304,
+        2784
+      ],
+      "id": "1ad99d1a-a28b-400a-999c-1fbe76f1c98b",
+      "name": "AI Agent3",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2368,
+        2992
+      ],
+      "id": "f26e2646-80b2-4bbd-930f-2c5c38165178",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da4f9e51-7aa7-4473-a46a-2e41e65e6a74",
+              "name": "Try_Again",
+              "value": "Let's create a new claim. Please provide the following details. First, the customer's full name. Then, the date the claim was reported. Next, the date of the incident itself. After that, tell me the type of incident. Please include a short description of what happened. Then, tell me the location of the incident. Finally, provide the estimated amount of damage. There's space for some aditional notes.",
+              "type": "string"
+            },
+            {
+              "id": "b15d143b-0681-4eff-908c-bb51fbad4e6b",
+              "name": "output.language",
+              "value": "={{ $json.output.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2080,
+        2784
+      ],
+      "id": "5a50e5fc-33bd-4142-bafc-8ebdf371c85d",
+      "name": "Edit Fields1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "29vD33N1CtxCmqQRPOHJ",
+          "mode": "list",
+          "cachedResultName": "Drew"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        2784
+      ],
+      "id": "137e28a7-49a9-43ac-9b77-75be81700c3d",
+      "name": "Convert text to speech1",
+      "executeOnce": true,
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        2784
+      ],
+      "id": "40adb875-90a7-46c1-963d-bd8bf18086d2",
+      "name": "Send an audio file",
+      "webhookId": "2bf48aa7-c4f4-44e7-94cb-43788987103b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Try_Again }}{{ $json.output.language }}",
+        "options": {
+          "systemMessage": "Translate the message text to the language of the country code provided in the input. \n\nIf the language is already English, then send the original message as output"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        3424
+      ],
+      "id": "0ed44bb6-90c7-43a2-a454-acd82bad702a",
+      "name": "AI Agent4",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        3648
+      ],
+      "id": "455538af-34e7-4ce3-99f5-6a539a75a56d",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da4f9e51-7aa7-4473-a46a-2e41e65e6a74",
+              "name": "Try_Again",
+              "value": "Canceling claim creation. In what else can I help you?",
+              "type": "string"
+            },
+            {
+              "id": "b15d143b-0681-4eff-908c-bb51fbad4e6b",
+              "name": "output.language",
+              "value": "={{ $json.output.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        3536
+      ],
+      "id": "99a2a66a-6e8b-4e3a-8676-36a9c83f4d63",
+      "name": "Edit Fields2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "29vD33N1CtxCmqQRPOHJ",
+          "mode": "list",
+          "cachedResultName": "Drew"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        3536
+      ],
+      "id": "c032ed84-734e-4e23-9a80-fadd798d8b00",
+      "name": "Convert text to speech2",
+      "executeOnce": true,
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        3536
+      ],
+      "id": "ecbcfe18-b4b7-426a-909d-1ca2a65f0907",
+      "name": "Send an audio file1",
+      "webhookId": "2bf48aa7-c4f4-44e7-94cb-43788987103b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Try_Again }}{{ $json.output.language }}",
+        "options": {
+          "systemMessage": "Translate the message text to the language of the country code provided in the input. \n\nIf the language is already English, then send the original message as output"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        3824
+      ],
+      "id": "080ddeb6-1e5d-4fe8-be91-577b8bd84182",
+      "name": "AI Agent5",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        4048
+      ],
+      "id": "86382d0c-a7ec-4eb2-a44d-5fc51cff2dee",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da4f9e51-7aa7-4473-a46a-2e41e65e6a74",
+              "name": "Try_Again",
+              "value": "Could not get enough information to form a claim, please try again.",
+              "type": "string"
+            },
+            {
+              "id": "b15d143b-0681-4eff-908c-bb51fbad4e6b",
+              "name": "output.language",
+              "value": "={{ $json.output.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        3936
+      ],
+      "id": "e07a95be-3944-4516-b4d0-65b2379fc197",
+      "name": "Edit Fields3",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "29vD33N1CtxCmqQRPOHJ",
+          "mode": "list",
+          "cachedResultName": "Drew"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        3936
+      ],
+      "id": "cdf1de7e-df06-4514-bc9c-a8bf4c724ea0",
+      "name": "Convert text to speech5",
+      "executeOnce": true,
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        3936
+      ],
+      "id": "b05554a8-59fd-4e6b-8b1a-9a940b62c11b",
+      "name": "Send an audio file4",
+      "webhookId": "2bf48aa7-c4f4-44e7-94cb-43788987103b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Try_Again }}{{ $json.output.language }}",
+        "options": {
+          "systemMessage": "Translate the message text to the language of the country code provided in the input. \n\nIf the language is already English, then send the original message as output"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2576,
+        4224
+      ],
+      "id": "9327ea38-2e0e-4188-be2b-8a8209592494",
+      "name": "AI Agent6",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        4448
+      ],
+      "id": "2bca3395-cb14-4aef-93bc-f8639f0fe444",
+      "name": "Google Gemini Chat Model6",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da4f9e51-7aa7-4473-a46a-2e41e65e6a74",
+              "name": "Try_Again",
+              "value": "Claim submited.",
+              "type": "string"
+            },
+            {
+              "id": "b15d143b-0681-4eff-908c-bb51fbad4e6b",
+              "name": "output.language",
+              "value": "={{ $json.output.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        4224
+      ],
+      "id": "052eaa5c-2583-4e6a-9d98-24aeb069a6d5",
+      "name": "Edit Fields4",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "29vD33N1CtxCmqQRPOHJ",
+          "mode": "list",
+          "cachedResultName": "Drew"
+        },
+        "text": "={{ $json.output }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        2928,
+        4224
+      ],
+      "id": "8bcfbfa8-5317-476a-a7d5-f69e921c8636",
+      "name": "Convert text to speech6",
+      "executeOnce": true,
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "WNGbuT8nCMAiRRFe",
+          "name": "ElevenLabsForge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3152,
+        4224
+      ],
+      "id": "009e7b7c-1be6-4b04-ab46-422a70bd0239",
+      "name": "Send an audio file6",
+      "webhookId": "2bf48aa7-c4f4-44e7-94cb-43788987103b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appHrGAmKTCuryte4",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUB0JERd31kpYJh",
+          "mode": "id"
+        },
+        "filterByFormula": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2368,
+        2288
+      ],
+      "id": "0e667780-7c70-4b95-bfac-9022103e6db6",
+      "name": "Get Customers1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://elevenlabs-twilio-exto.onrender.com/outbound-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_c97b8fa2a477de841f29ec391b52c87b7339b93aba459833"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"number\": \"+351912602277\",\n  \"message\": \"Hello, this is your outbound call message.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2832,
+        3168
+      ],
+      "id": "9a875bbc-e641-4cb1-a798-8e5419cef6f8",
+      "name": "HTTP Request PAY"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://elevenlabs-twilio-i-o2.onrender.com/outbound-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_c97b8fa2a477de841f29ec391b52c87b7339b93aba459833"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"={{ $json['Customer Phone'] }}\",\n  \"message\": \"Hello,This is your message\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2640,
+        2176
+      ],
+      "id": "f69b08ff-de76-49da-b8cb-79aa47c352b9",
+      "name": "HTTP Request Policy"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        4688
+      ],
+      "id": "5dece77c-d591-4270-b6da-c60a89f64f62",
+      "name": "Google Gemini Chat Model7",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TG7wwSKkIfU61p2T",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Transcribe audio or video').item.json.text }}",
+        "options": {
+          "systemMessage": "You are an expert HTML professional and a helpful, meticulous assistant specializing in the creation of clean, professional, single-page documents optimized for automated PDF conversion.\n\n**Your Task:**\nYou will receive raw information (as text or a conceptual data object) concerning a 'Claim Report' (e.g., an insurance claim, a detailed customer complaint, or a legal summary). Your sole function is to process, summarize, and organize this information into a structured, print-ready HTML file.\n\n**Output Requirements & Constraints:**\n\n1.  **Format:** Generate a single, complete, self-contained HTML document. All necessary styling (CSS) **must be embedded** within a `<style>` block in the `<head>` section. **Do not use external links** (no external stylesheets, scripts, images, or fonts).\n2.  **Design:** The layout must be highly professional, resembling a formal business report or resume. Use clear, legible, system-default sans-serif typography (e.g., Arial, Helvetica) and utilize clear headings, sections, and structured tables or definition lists to ensure the claim data is presented logically and easy to read.\n3.  **PDF Optimization:** The design must be optimized for perfect rendering when converted to PDF. Ensure minimal use of absolute positioning and structure content to prevent unnatural page breaks (though the goal is a single-page output).\n4.  **Target Viewport:** Design the content to look optimal when rendered in a browser viewport with the dimensions: **Width: 1080px** and **Height: 720px**. The document content must fit neatly within this space.\n\n**Final Instruction:**\nReturn **pure, raw HTML content only**, starting with `<!DOCTYPE html>` and ending with `</html>`. Do not include any introductory text, explanation, or conversational commentary."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1520,
+        4496
+      ],
+      "id": "651668bb-52d6-485f-bddf-0fcf8e9edf28",
+      "name": "AI Agent7"
+    },
+    {
+      "parameters": {
+        "html_content": "={{ $json.output }}",
+        "response_format_html": "base64"
+      },
+      "type": "n8n-nodes-htmlcsstopdf.htmlcsstopdf",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        4496
+      ],
+      "id": "2eab06aa-7974-482c-959f-76ab2fb2f61a",
+      "name": "HTML to PDF",
+      "credentials": {
+        "htmlcsstopdfApi": {
+          "id": "aFBqyEbnHQzldJDs",
+          "name": "HTML to PDF account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "file": "https://generated-image.s3.ap-south-1.amazonaws.com/pdfs/2e08d29f-11df-4d0b-b47a-efb0494ba281.pdf",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        4496
+      ],
+      "id": "ac89d56e-2a48-4198-8952-bb4679b9e45a",
+      "name": "Send a document",
+      "webhookId": "a04285a3-6f27-4e13-bced-6a1a6bc4cffb",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "I only have 7 more calls from this API",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        4672
+      ],
+      "id": "e9ae3600-3128-41bd-8617-1fe8808372f4",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "lR7vm21lR272AQ4r",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/lR7vm21lR272AQ4r",
+          "cachedResultName": "InsurTech Voice Claim Intake"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2336,
+        1792
+      ],
+      "id": "c36fb52e-4c9f-4288-b307-85dad97d7fa9",
+      "name": "Call 'InsurTech Voice Claim Intake'",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "instructions": "I only want the fields Customer Phone and preferred language",
+        "codeGeneratedForPrompt": "I only want the fields Customer Phone and preferred language",
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  return {\n    \"Customer Phone\": item.json[\"Customer Phone\"],\n    \"Language Preference\": item.json[\"Language Preference\"],\n  };\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.aiTransform",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        2176
+      ],
+      "id": "a22d2f5a-64cc-4278-9ae6-4f3dd8cd5c16",
+      "name": "AI Transform"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2848,
+        2400
+      ],
+      "id": "e7a42e8f-31d4-409e-b6ba-a139d852265c",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3056,
+        2400
+      ],
+      "id": "553b3fe1-5e9b-40d2-b705-76aa1ad01935",
+      "name": "Send a document1",
+      "webhookId": "52f45cd1-4603-47bb-bece-6ff7b9adce7e",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZYn3g1bS94gc9DVw",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "=appWqdrq3BwvwyyPN",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblSqQBJsQI87ax8G",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        2992
+      ],
+      "id": "d20f7f0f-fc72-4f53-8e88-e59a14c4f3da",
+      "name": "Get Policies1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appHrGAmKTCuryte4",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUB0JERd31kpYJh",
+          "mode": "id"
+        },
+        "filterByFormula": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1616,
+        3184
+      ],
+      "id": "a1353888-5bb4-4cff-9734-6e7f0d02a82d",
+      "name": "Get Customers2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Av2SsQDxrzsseKcv",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Customer Name",
+              "field2": "Full Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2096,
+        3168
+      ],
+      "id": "f308dd53-9051-405e-8eff-c073936a5da7",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "instructions": "I only want the fields Customer Phone and preferred language",
+        "codeGeneratedForPrompt": "I only want the fields Customer Phone and preferred language",
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  return {\n    \"Customer Phone\": item.json[\"Customer Phone\"],\n    \"Language Preference\": item.json[\"Language Preference\"],\n  };\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.aiTransform",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        3168
+      ],
+      "id": "e5152cd5-a7b5-46e2-85de-3a46f4f8ff7c",
+      "name": "AI Transform1"
+    },
+    {
+      "parameters": {
+        "content": "Filter Customers who have some fees to pay.",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        2944
+      ],
+      "id": "69f51d01-71ee-4df5-9417-344367b24aed",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "685e090b-f39a-4a50-b20c-b4481e1d057a",
+              "leftValue": "={{ $json.Ammount_Delayed }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1824,
+        3184
+      ],
+      "id": "5aa85ad9-2abd-47f2-b992-a9f3f35bc2df",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "content": "Contact Customers whom have impending fees.",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        2832
+      ],
+      "id": "5799fffc-f5a6-478e-aa3a-e1de5d94840d",
+      "name": "Sticky Note15"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Policies": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customers": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio or video": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Claims": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Policies",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Customers",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Claims",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Customers1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Employee State4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Policies1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Customers2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Voice File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio or video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Claim in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Update Employee State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Policies2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Employee State1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Claim Message1": {
+      "main": [
+        [
+          {
+            "node": "Create Claim in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Invalid Claim Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Policies2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech1": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech2": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech5": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent6": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech6": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customers1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Transform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request Policy": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Employee State1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent7": {
+      "main": [
+        [
+          {
+            "node": "HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an audio file5": {
+      "main": [
+        [
+          {
+            "node": "Call 'InsurTech Voice Claim Intake'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Transform": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request Policy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request PAY": {
+      "main": [
+        []
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Policies1": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customers2": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "AI Transform1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Transform1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request PAY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "af70e3d6-0fc4-45ac-badd-90e7de6fb2fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d3fc1b7fcffb6fe9dce695b7da2c67304b2f2b59f40e4408766dac6f6fdeca8"
+  },
+  "id": "lR7vm21lR272AQ4r",
+  "tags": []
+}
